@@ -364,6 +364,53 @@ func (_c *UserRepositoryMock_SearchUsers_Call) RunAndReturn(run func(context.Con
 	return _c
 }
 
+// UpdateUser provides a mock function with given fields: ctx, user
+func (_m *UserRepositoryMock) UpdateUser(ctx context.Context, user *models.User) error {
+	ret := _m.Called(ctx, user)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateUser")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *models.User) error); ok {
+		r0 = rf(ctx, user)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UserRepositoryMock_UpdateUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateUser'
+type UserRepositoryMock_UpdateUser_Call struct {
+	*mock.Call
+}
+
+// UpdateUser is a helper method to define mock.On call
+//   - ctx context.Context
+//   - user *models.User
+func (_e *UserRepositoryMock_Expecter) UpdateUser(ctx interface{}, user interface{}) *UserRepositoryMock_UpdateUser_Call {
+	return &UserRepositoryMock_UpdateUser_Call{Call: _e.mock.On("UpdateUser", ctx, user)}
+}
+
+func (_c *UserRepositoryMock_UpdateUser_Call) Run(run func(ctx context.Context, user *models.User)) *UserRepositoryMock_UpdateUser_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*models.User))
+	})
+	return _c
+}
+
+func (_c *UserRepositoryMock_UpdateUser_Call) Return(_a0 error) *UserRepositoryMock_UpdateUser_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *UserRepositoryMock_UpdateUser_Call) RunAndReturn(run func(context.Context, *models.User) error) *UserRepositoryMock_UpdateUser_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewUserRepositoryMock creates a new instance of UserRepositoryMock. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewUserRepositoryMock(t interface {

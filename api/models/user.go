@@ -37,6 +37,11 @@ type CreateUserPayload struct {
 	Email string `json:"email"`
 }
 
+type UpdateUserPayload struct {
+	Name     string `json:"name"`
+	Username string `json:"username"`
+}
+
 type UserResponse struct {
 	Name      string `json:"name"`
 	Email     string `json:"email"`

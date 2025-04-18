@@ -12,6 +12,8 @@ import { RegisterPage } from "@/pages/auth/register";
 // App pages
 import { FeedPage } from "@/pages/app/feed";
 import { ProfilePage } from "./pages/app/profile";
+import { SettingsLayout } from "./pages/app/settings/settings-layout";
+import { SecurityAndAccountAcessPage } from "./pages/app/settings/security-and-account-acess";
 
 export const router = createBrowserRouter([
   {
@@ -43,6 +45,20 @@ export const router = createBrowserRouter([
       {
         path: ":username",
         element: <ProfilePage />,
+      },
+      {
+        path: "settings",
+        element: <SettingsLayout />,
+        children: [
+          {
+            path: "account",
+            element: <div>Account Settings</div>,
+          },
+          {
+            path: "security-and-account-acess",
+            element: <SecurityAndAccountAcessPage />,
+          },
+        ],
       },
     ],
   },

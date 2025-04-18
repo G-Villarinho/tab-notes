@@ -15,6 +15,7 @@ type UserService interface {
 	GetProfile(ctx context.Context, id string) (*models.UserResponse, error)
 	SearchUsers(ctx context.Context, query string) ([]*models.SearchUserResponse, error)
 	GetProfileByUsername(ctx context.Context, username string, viewerID string) (*models.UserProfileResponse, error)
+	UpdateUser(ctx context.Context, id string, name string, username string) error
 }
 
 type userService struct {
@@ -146,4 +147,35 @@ func (u *userService) GetProfileByUsername(ctx context.Context, username string,
 		FollowedByMe: followStats.FollowedByMe,
 		FollowingMe:  followStats.FollowingMe,
 	}, nil
+}
+
+func (u *userService) UpdateUser(ctx context.Context, id string, name string, username string) error {
+	user, err := u.ur.GetUserByID(ctx, id)
+	if err != nil {
+		return fmt.Errorf("get user by id %s: %w", id, err)
+	}
+
+	if user == nil {
+		return models.ErrUserNotFound
+	}
+
+	if user.Username != username {
+		userFromUsername, err := u.ur.GetUserByUsername(ctx, username)
+		if err != nil {
+			return fmt.Errorf("get user by username: %w", err)
+		}
+
+		if userFromUsername != nil {
+			return models.ErrUsernameAlreadyExists
+		}
+
+		user.Username = username
+	}
+
+	user.Name = name
+	if err := u.ur.UpdateUser(ctx, user); err != nil {
+		return fmt.Errorf("update user: %w", err)
+	}
+
+	return nil
 }

@@ -1,4 +1,3 @@
-// src/pages/app/profile-page.tsx
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
@@ -55,7 +54,6 @@ export function ProfilePage() {
       <div className="mx-auto w-full max-w-screen">
         <div className="grid grid-cols-1 md:grid-cols-[minmax(0,850px)_1fr] gap-6">
           <section className="space-y-6">
-            {/* Header */}
             {profileNotFound ? (
               <div className="border text-destructive bg-destructive/10 rounded-lg px-4 py-6 text-center text-sm font-medium">
                 Conta não encontrada 😕

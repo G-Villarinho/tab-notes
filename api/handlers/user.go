@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -14,6 +15,7 @@ type UserHandler interface {
 	GetProfile(w http.ResponseWriter, r *http.Request)
 	SearchUsers(w http.ResponseWriter, r *http.Request)
 	GetProfileByUsername(w http.ResponseWriter, r *http.Request)
+	UpdateUser(w http.ResponseWriter, r *http.Request)
 }
 
 type userHandler struct {
@@ -120,4 +122,46 @@ func (u *userHandler) GetProfileByUsername(w http.ResponseWriter, r *http.Reques
 	}
 
 	JSON(w, http.StatusOK, response)
+}
+
+func (u *userHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	logger := slog.With(
+		slog.String("handler", "user"),
+		slog.String("method", "UpdateUser"),
+	)
+
+	var payload models.UpdateUserPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		logger.Error("error decoding request body", "error", err)
+		NoContent(w, http.StatusBadRequest)
+		return
+	}
+
+	userID, ok := u.rc.GetUserID(r.Context())
+	if !ok {
+		logger.Error("userID not found in context")
+		DeleteTokenCookie(w)
+		NoContent(w, http.StatusUnauthorized)
+		return
+	}
+
+	if err := u.us.UpdateUser(r.Context(), userID, payload.Name, payload.Username); err != nil {
+		if err == models.ErrUserNotFound {
+			logger.Error("user not found", "userID", userID)
+			NoContent(w, http.StatusNotFound)
+			return
+		}
+
+		if err == models.ErrUsernameAlreadyExists {
+			logger.Error("username already exists", "username", payload.Username)
+			NoContent(w, http.StatusConflict)
+			return
+		}
+
+		logger.Error("error updating user", "error", err)
+		NoContent(w, http.StatusInternalServerError)
+		return
+	}
+
+	NoContent(w, http.StatusOK)
 }

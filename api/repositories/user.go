@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/g-villarinho/tab-notes-api/models"
 	"github.com/g-villarinho/tab-notes-api/utils"
@@ -16,6 +17,7 @@ type UserRepository interface {
 	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
 	GetUsersByIds(ctx context.Context, ids []string) ([]*models.User, error)
 	SearchUsers(ctx context.Context, query string) ([]*models.User, error)
+	UpdateUser(ctx context.Context, user *models.User) error
 }
 
 type userRepository struct {
@@ -150,6 +152,32 @@ func (r *userRepository) SearchUsers(ctx context.Context, query string) ([]*mode
 	}
 
 	return users, nil
+}
+
+func (r *userRepository) UpdateUser(ctx context.Context, user *models.User) error {
+	updatedAt := sql.NullTime{
+		Time:  time.Now().UTC(),
+		Valid: true,
+	}
+
+	sql := `
+		UPDATE users
+		SET name = ?, username = ?, updated_at = ?
+		WHERE id = ?
+	`
+
+	stmt, err := r.db.PrepareContext(ctx, sql)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.ExecContext(ctx, user.Name, user.Username, updatedAt, user.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func join(strs []string, sep string) string {

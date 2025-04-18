@@ -103,6 +103,7 @@ func setupUserRoutes(db *sql.DB, router *Router) {
 	router.GET("/me", authMiddleware.Authenticated(userHandler.GetProfile))
 	router.GET("/users", authMiddleware.Authenticated(userHandler.SearchUsers))
 	router.GET("/users/{username}", authMiddleware.Authenticated(userHandler.GetProfileByUsername))
+	router.PUT("/users", authMiddleware.Authenticated(userHandler.UpdateUser))
 }
 
 func setupFollowerRoutes(db *sql.DB, router *Router) {
