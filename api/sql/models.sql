@@ -1,0 +1,60 @@
+CREATE TABLE users (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) NOT NULL UNIQUE,
+  username VARCHAR(100) NOT NULL UNIQUE
+  status ENUM('active', 'inactive', 'banned') NOT NULL DEFAULT 'active',
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NULL DEFAULT NULL,
+  banned_at DATETIME NULL DEFAULT NULL
+)ENGINE=INNODB;
+
+CREATE TABLE sessions (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  token TEXT NOT NULL,
+  expires_at DATETIME NOT NULL,
+  user_id CHAR(36) NOT NULL,
+  revoked_at DATETIME NULL DEFAULT NULL,
+  verified_at DATETIME NULL DEFAULT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NULL DEFAULT NULL,
+
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)ENGINE=INNODB;
+
+
+CREATE TABLE followers (
+  user_id     CHAR(36) NOT NULL,
+  follower_id CHAR(36) NOT NULL,
+  created_at  DATETIME NOT NULL,
+
+  PRIMARY KEY (user_id, follower_id),
+
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE
+)ENGINE=INNODB;
+
+
+CREATE TABLE posts (
+	id CHAR(36) NOT NULL PRIMARY KEY,
+	title VARCHAR(50) NOT NULL,
+	content VARCHAR(2000) NOT NULL,
+	author_id  CHAR(36) NOT NULL,
+	created_at DATETIME NOT NULL,
+	updated_at DATETIME NULL DEFAULT NULL,
+	
+	likes INT DEFAULT 0,
+	
+	FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+)ENGINE=INNODB;
+
+CREATE TABLE likes (
+  user_id CHAR(36) NOT NULL,
+  post_id CHAR(36) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (user_id, post_id),
+
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

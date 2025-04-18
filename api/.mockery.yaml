@@ -1,0 +1,31 @@
+with-expecter: True
+disable-version-string: True
+filename: "{{ .InterfaceName | snakecase }}_mock.go"
+mockname: "{{ .InterfaceName }}Mock"
+dir: "mocks"
+outpkg: "mocks"
+packages:
+    github.com/g-villarinho/tab-notes-api/handlers:
+            config:
+                all: True
+                recursive: True
+    github.com/g-villarinho/tab-notes-api/services:
+        config:
+            all: True
+            recursive: True
+    github.com/g-villarinho/tab-notes-api/repositories:
+        config:
+            all: True
+            recursive: True
+    github.com/g-villarinho/tab-notes-api/pkgs:
+        config:
+            all: True
+            recursive: True
+    github.com/g-villarinho/tab-notes-api/middlewares:
+        config:
+            all: True
+            recursive: True
+    github.com/g-villarinho/tab-notes-api/clients:
+        config:
+            all: True
+            recursive: True

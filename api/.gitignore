@@ -1,0 +1,38 @@
+*.pem
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Output do build
+/build/
+bin/
+main
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Arquivos temporários
+*.log
+*.tmp
+
+# Variáveis de ambiente
+.env
+
+# Cache do Go
+/go.sum
+/go.work
+/go.work.sum
+
+# Dependências do mod
+vendor/
+
+# Docker
+*.pid
+docker-compose.override.yml
