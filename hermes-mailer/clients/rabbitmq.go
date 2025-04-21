@@ -1,6 +1,8 @@
 package clients
 
 import (
+	"context"
+
 	"github.com/hermes-mailer/models"
 	"github.com/streadway/amqp"
 )
@@ -39,6 +41,24 @@ func (r *RabbitMQClient) Consume(queueName string) (<-chan amqp.Delivery, error)
 	}
 
 	return msgs, nil
+}
+
+func (r *RabbitMQClient) Publish(ctx context.Context, queueName string, body []byte) error {
+	_, err := r.ch.QueueDeclare(queueName, true, false, false, false, nil)
+	if err != nil {
+		return err
+	}
+
+	return r.ch.Publish(
+		"",        // exchange
+		queueName, // routing key
+		false,     // mandatory
+		false,     // immediate
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        body,
+		},
+	)
 }
 
 func (r *RabbitMQClient) Close() {

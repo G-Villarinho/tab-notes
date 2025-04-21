@@ -1,8 +1,15 @@
 package models
 
 type Environment struct {
-	RabbitMQ
-	SMTP
+	API      API
+	RabbitMQ RabbitMQ
+	SMTP     SMTP
+}
+
+type API struct {
+	QueueName string
+	APIKey    string
+	Port      int
 }
 
 type RabbitMQ struct {

@@ -2,31 +2,49 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
+	"github.com/hermes-mailer/config"
 	"github.com/hermes-mailer/models"
 )
 
 type EmailService interface {
-	Send(ctx context.Context, email models.Email) error
+	Enqueue(ctx context.Context, email models.Email) error
+	SendEmail(ctx context.Context, email models.Email) error
 }
 
 type emailService struct {
-	emailClient models.EmailSenderClient
+	ec models.EmailSenderClient
+	qs QueueService
 }
 
-func NewEmailService(client models.EmailSenderClient) EmailService {
+func NewEmailService(
+	client models.EmailSenderClient,
+	queueService QueueService) EmailService {
 	return &emailService{
-		emailClient: client,
+		ec: client,
+		qs: queueService,
 	}
 }
 
-func (e *emailService) Send(ctx context.Context, email models.Email) error {
-	if err := e.emailClient.SendEmail(ctx, email); err != nil {
+func (e *emailService) SendEmail(ctx context.Context, email models.Email) error {
+	if err := e.ec.SendEmail(ctx, email); err != nil {
 		return fmt.Errorf("send email: %w", err)
 	}
 
-	// TODO: Save email to database
+	return nil
+}
+
+func (e *emailService) Enqueue(ctx context.Context, email models.Email) error {
+	bytes, err := json.Marshal(email)
+	if err != nil {
+		return fmt.Errorf("marshal email: %w", err)
+	}
+
+	if err := e.qs.Publish(ctx, config.Env.API.QueueName, bytes); err != nil {
+		return fmt.Errorf("enqueue email: %w", err)
+	}
 
 	return nil
 }

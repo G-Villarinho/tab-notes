@@ -29,11 +29,23 @@ func (s *SMTPEmailSenderClient) SendEmail(ctx context.Context, email models.Emai
 	addr := fmt.Sprintf("%s:%d", s.Host, s.Port)
 	auth := smtp.PlainAuth("", s.Username, s.Password, s.Host)
 
+	boundary := "hermes-boundary"
+
 	msg := []byte("To: " + email.To + "\r\n" +
+		"From: " + s.Username + "\r\n" +
 		"Subject: " + email.Subject + "\r\n" +
-		"Content-Type: text/plain; charset=\"utf-8\"\r\n" +
+		"MIME-Version: 1.0\r\n" +
+		"Content-Type: multipart/alternative; boundary=" + boundary + "\r\n" +
 		"\r\n" +
-		email.Body + "\r\n")
+		"--" + boundary + "\r\n" +
+		"Content-Type: text/plain; charset=\"UTF-8\"\r\n" +
+		"\r\n" +
+		email.BodyText + "\r\n" +
+		"--" + boundary + "\r\n" +
+		"Content-Type: text/html; charset=\"UTF-8\"\r\n" +
+		"\r\n" +
+		email.BodyHTML + "\r\n" +
+		"--" + boundary + "--")
 
 	if err := smtp.SendMail(addr, auth, s.Username, []string{email.To}, msg); err != nil {
 		return fmt.Errorf("send email: %w", err)

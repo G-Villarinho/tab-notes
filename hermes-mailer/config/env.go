@@ -17,6 +17,11 @@ func LoadEnv() error {
 	}
 
 	Env = models.Environment{
+		API: models.API{
+			QueueName: os.Getenv("QUEUE_NAME"),
+			APIKey:    os.Getenv("API_KEY"),
+			Port:      parseInt(os.Getenv("API_PORT")),
+		},
 		RabbitMQ: models.RabbitMQ{
 			URL: os.Getenv("AMQP_URL"),
 		},

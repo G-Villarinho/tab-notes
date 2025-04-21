@@ -2,57 +2,59 @@ package services
 
 import (
 	"context"
-	"encoding/json"
-	"log"
 
 	"github.com/hermes-mailer/models"
 )
 
 type QueueService interface {
-	Start() error
+	Publish(ctx context.Context, queueName string, body []byte) error
+	Consume(ctx context.Context, queueName string) (<-chan []byte, error)
 }
 
 type queueService struct {
-	queueClient     models.QueueConsumer
-	emailService    EmailService
-	processingQueue string
+	queueClient models.QueueConsumer
 }
 
 func NewQueueService(
 	client models.QueueConsumer,
-	emailService EmailService,
 	queueName string) QueueService {
 	return &queueService{
-		queueClient:     client,
-		emailService:    emailService,
-		processingQueue: queueName,
+		queueClient: client,
 	}
 }
 
-func (q *queueService) Start() error {
-	msgs, err := q.queueClient.Consume(q.processingQueue)
+func (q *queueService) Publish(ctx context.Context, queueName string, body []byte) error {
+	err := q.queueClient.Publish(ctx, queueName, body)
 	if err != nil {
 		return err
-	}
-
-	for msg := range msgs {
-		go q.handleMessage(msg.Body)
 	}
 
 	return nil
 }
 
-func (q *queueService) handleMessage(body []byte) {
-	var email models.Email
-	if err := json.Unmarshal(body, &email); err != nil {
-		log.Println("❌ Erro ao deserializar:", err)
-		return
+func (q *queueService) Consume(ctx context.Context, queueName string) (<-chan []byte, error) {
+	deliveries, err := q.queueClient.Consume(queueName)
+	if err != nil {
+		return nil, err
 	}
 
-	if err := q.emailService.Send(context.Background(), email); err != nil {
-		log.Println("❌ Erro ao enviar e-mail:", err)
-		return
-	}
+	byteChan := make(chan []byte)
 
-	log.Println("✅ Email enviado com sucesso")
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				close(byteChan)
+				return
+			case msg, ok := <-deliveries:
+				if !ok {
+					close(byteChan)
+					return
+				}
+				byteChan <- msg.Body
+			}
+		}
+	}()
+
+	return byteChan, nil
 }
