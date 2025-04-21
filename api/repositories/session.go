@@ -141,7 +141,9 @@ func (r *sessionRepository) GetSessionsByUserID(ctx context.Context, userID stri
 	query := `
 		SELECT id, token, expires_at, user_id, revoked_at, verified_at, created_at, updated_at
 		FROM sessions
-		WHERE user_id = ?
+		WHERE user_id = ? 
+		AND verified_at IS NOT NULL 
+		AND revoked_at IS NULL
 		ORDER BY created_at DESC
 	`
 

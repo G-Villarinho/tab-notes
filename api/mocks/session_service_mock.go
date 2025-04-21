@@ -80,9 +80,9 @@ func (_c *SessionServiceMock_CreateSession_Call) RunAndReturn(run func(context.C
 	return _c
 }
 
-// GetUserSessions provides a mock function with given fields: ctx, userID
-func (_m *SessionServiceMock) GetUserSessions(ctx context.Context, userID string) ([]*models.SessionResponse, error) {
-	ret := _m.Called(ctx, userID)
+// GetUserSessions provides a mock function with given fields: ctx, userID, currentSessionID
+func (_m *SessionServiceMock) GetUserSessions(ctx context.Context, userID string, currentSessionID string) ([]*models.SessionResponse, error) {
+	ret := _m.Called(ctx, userID, currentSessionID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetUserSessions")
@@ -90,19 +90,19 @@ func (_m *SessionServiceMock) GetUserSessions(ctx context.Context, userID string
 
 	var r0 []*models.SessionResponse
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) ([]*models.SessionResponse, error)); ok {
-		return rf(ctx, userID)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) ([]*models.SessionResponse, error)); ok {
+		return rf(ctx, userID, currentSessionID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) []*models.SessionResponse); ok {
-		r0 = rf(ctx, userID)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) []*models.SessionResponse); ok {
+		r0 = rf(ctx, userID, currentSessionID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*models.SessionResponse)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, userID)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, userID, currentSessionID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -118,13 +118,14 @@ type SessionServiceMock_GetUserSessions_Call struct {
 // GetUserSessions is a helper method to define mock.On call
 //   - ctx context.Context
 //   - userID string
-func (_e *SessionServiceMock_Expecter) GetUserSessions(ctx interface{}, userID interface{}) *SessionServiceMock_GetUserSessions_Call {
-	return &SessionServiceMock_GetUserSessions_Call{Call: _e.mock.On("GetUserSessions", ctx, userID)}
+//   - currentSessionID string
+func (_e *SessionServiceMock_Expecter) GetUserSessions(ctx interface{}, userID interface{}, currentSessionID interface{}) *SessionServiceMock_GetUserSessions_Call {
+	return &SessionServiceMock_GetUserSessions_Call{Call: _e.mock.On("GetUserSessions", ctx, userID, currentSessionID)}
 }
 
-func (_c *SessionServiceMock_GetUserSessions_Call) Run(run func(ctx context.Context, userID string)) *SessionServiceMock_GetUserSessions_Call {
+func (_c *SessionServiceMock_GetUserSessions_Call) Run(run func(ctx context.Context, userID string, currentSessionID string)) *SessionServiceMock_GetUserSessions_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
 	})
 	return _c
 }
@@ -134,7 +135,7 @@ func (_c *SessionServiceMock_GetUserSessions_Call) Return(_a0 []*models.SessionR
 	return _c
 }
 
-func (_c *SessionServiceMock_GetUserSessions_Call) RunAndReturn(run func(context.Context, string) ([]*models.SessionResponse, error)) *SessionServiceMock_GetUserSessions_Call {
+func (_c *SessionServiceMock_GetUserSessions_Call) RunAndReturn(run func(context.Context, string, string) ([]*models.SessionResponse, error)) *SessionServiceMock_GetUserSessions_Call {
 	_c.Call.Return(run)
 	return _c
 }

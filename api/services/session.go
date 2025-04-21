@@ -15,7 +15,7 @@ type SessionService interface {
 	ValidSession(ctx context.Context, token string) (string, error)
 	RevokeSession(ctx context.Context, sessionId string) error
 	IsSessionRevoked(ctx context.Context, sessionId string) (bool, error)
-	GetUserSessions(ctx context.Context, userID string) ([]*models.SessionResponse, error)
+	GetUserSessions(ctx context.Context, userID string, currentSessionID string) ([]*models.SessionResponse, error)
 	RevokeUserSession(ctx context.Context, userID string, sessionID string) error
 	RevokeAllUserSessions(ctx context.Context, userID string, currentSessionID string, revokeCurrent bool) error
 }
@@ -120,7 +120,7 @@ func (s *sessionService) IsSessionRevoked(ctx context.Context, sessionId string)
 	return revoked, nil
 }
 
-func (s *sessionService) GetUserSessions(ctx context.Context, userID string) ([]*models.SessionResponse, error) {
+func (s *sessionService) GetUserSessions(ctx context.Context, userID string, currentSessionID string) ([]*models.SessionResponse, error) {
 	sessions, err := s.sr.GetSessionsByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("get sessions by user id: %w", err)
@@ -130,23 +130,24 @@ func (s *sessionService) GetUserSessions(ctx context.Context, userID string) ([]
 		return []*models.SessionResponse{}, nil
 	}
 
-	var sessionResponses []*models.SessionResponse
+	sessionResponses := make([]*models.SessionResponse, 0, len(sessions))
 	for _, session := range sessions {
-		sessionResponse := &models.SessionResponse{
-			ID:        session.ID,
-			ExpiresAt: session.ExpiresAt,
-			CreatedAt: session.CreatedAt,
+		resp := &models.SessionResponse{
+			ID:               session.ID,
+			ExpiresAt:        session.ExpiresAt,
+			CreatedAt:        session.CreatedAt,
+			CurrentSessionID: currentSessionID,
 		}
 
 		if session.VerifiedAt.Valid {
-			sessionResponse.VerifiedAt = &session.VerifiedAt.Time
+			resp.VerifiedAt = &session.VerifiedAt.Time
 		}
 
 		if session.RevokedAt.Valid {
-			sessionResponse.RevokedAt = &session.RevokedAt.Time
+			resp.RevokedAt = &session.RevokedAt.Time
 		}
 
-		sessionResponses = append(sessionResponses, sessionResponse)
+		sessionResponses = append(sessionResponses, resp)
 	}
 
 	return sessionResponses, nil

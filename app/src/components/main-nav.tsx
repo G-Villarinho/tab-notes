@@ -28,7 +28,6 @@ export function MainNav() {
 
   return (
     <nav className="rounded-2xl border bg-card shadow-md p-3 space-y-2">
-      {/* Título ou Branding opcional */}
       <div className="text-lg font-semibold text-foreground px-1">Menu</div>
       <Separator className="my-4" />
       <ul className="space-y-1">

@@ -42,7 +42,15 @@ func (s *sessionHandler) GetUserSessions(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	response, err := s.ss.GetUserSessions(r.Context(), userID)
+	currentSessionID, ok := s.rc.GetSessionID(r.Context())
+	if !ok {
+		logger.Error("sessionID not found in context")
+		DeleteTokenCookie(w)
+		NoContent(w, http.StatusUnauthorized)
+		return
+	}
+
+	response, err := s.ss.GetUserSessions(r.Context(), userID, currentSessionID)
 	if err != nil {
 		if err == models.ErrUserNotFound {
 			logger.Error("user not found", "userID", userID)

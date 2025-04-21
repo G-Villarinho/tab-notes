@@ -37,11 +37,9 @@ interface UpdateProfileProps {
 
 export function UpdateProfileModal({ open, onOpenChange }: UpdateProfileProps) {
   const { user, setUser } = useAuth();
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  if (!user) {
-    throw new Error("User not found");
-  }
+  if (!user) throw new Error("User not found");
 
   const {
     register,
@@ -55,26 +53,29 @@ export function UpdateProfileModal({ open, onOpenChange }: UpdateProfileProps) {
     },
   });
 
-  const { mutateAsync: updateProfileFn } = useMutation({
+  const { mutateAsync: mutateProfile } = useMutation({
     mutationFn: updateProfile,
   });
 
-  async function handleUpdateProfile(data: UpdateProfileSchema) {
-    if (!user) {
-      return;
-    }
-    setApiError(null);
+  async function onSubmit(formData: UpdateProfileSchema) {
     try {
-      await updateProfileFn(data);
-      user.name = data.name;
-      user.username = data.username;
-      setUser(user);
+      setErrorMessage(null);
+      await mutateProfile(formData);
+
+      if (user) {
+        setUser({
+          ...user,
+          name: formData.name,
+          username: formData.username,
+        });
+      }
+
       onOpenChange(false);
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 409) {
-        setApiError("Este nome de usuário já está em uso.");
+        setErrorMessage("Este nome de usuário já está em uso.");
       } else {
-        setApiError("Erro ao atualizar perfil. Tente novamente.");
+        setErrorMessage("Erro ao atualizar perfil. Tente novamente.");
       }
     }
   }
@@ -101,19 +102,15 @@ export function UpdateProfileModal({ open, onOpenChange }: UpdateProfileProps) {
             </DialogDescription>
           </DialogHeader>
 
-          {/* Alerta de erro */}
-          {apiError && (
+          {errorMessage && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Falha ao atualizar perfil</AlertTitle>
-              <AlertDescription>{apiError}</AlertDescription>
+              <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
 
-          <form
-            onSubmit={handleSubmit(handleUpdateProfile)}
-            className="grid gap-5"
-          >
+          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
             <div className="space-y-2">
               <Label htmlFor="name">Nome</Label>
               <Input

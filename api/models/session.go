@@ -28,9 +28,10 @@ type RevokeAllSessionsPayload struct {
 }
 
 type SessionResponse struct {
-	ID         string     `json:"id"`
-	ExpiresAt  time.Time  `json:"expires_at"`
-	VerifiedAt *time.Time `json:"verified_at,omitempty"`
-	RevokedAt  *time.Time `json:"revoked_at,omitempty"`
-	CreatedAt  time.Time  `json:"created_at"`
+	ID               string     `json:"id"`
+	ExpiresAt        time.Time  `json:"expires_at"`
+	CurrentSessionID string     `json:"current_session_id"`
+	VerifiedAt       *time.Time `json:"verified_at,omitempty"`
+	RevokedAt        *time.Time `json:"revoked_at,omitempty"`
+	CreatedAt        time.Time  `json:"created_at"`
 }

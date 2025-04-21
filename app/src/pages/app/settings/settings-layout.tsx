@@ -3,6 +3,7 @@ import { MainNav } from "@/components/main-nav";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { Search } from "lucide-react";
 
 const settingsSections = [
   {
@@ -29,15 +30,12 @@ export function SettingsLayout() {
 
   return (
     <div className="flex flex-col gap-6 p-4 md:flex-row md:items-start">
-      {/* Menu lateral de navegação geral */}
-      <aside className="hidden md:flex flex-col w-[220px] shrink-0">
+      <aside className="hidden md:flex flex-col w-[320px] shrink-0">
         <MainNav />
       </aside>
 
-      {/* Conteúdo principal com menu de configurações e detalhes */}
       <div className="flex flex-1 gap-4">
-        {/* Menu de configurações */}
-        <div className="w-[260px] rounded-xl border bg-card/70 p-4 shadow-sm space-y-4">
+        <div className="w-[300px] rounded-xl border bg-card/70 p-4 shadow-sm space-y-4">
           <h2 className="text-sm font-semibold text-muted-foreground">
             Configurações
           </h2>
@@ -50,7 +48,7 @@ export function SettingsLayout() {
               onChange={(e) => setSearch(e.target.value)}
             />
             <span className="absolute left-2 top-1.5 text-muted-foreground">
-              🔍
+              <Search className="h-4 w-4 mt-1" />
             </span>
           </div>
           <nav className="space-y-1 text-sm">
