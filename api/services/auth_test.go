@@ -75,7 +75,7 @@ func TestSendAuthenticationLink(t *testing.T) {
 		expectedLink := fmt.Sprintf("%s/magic-link/authenticate?token=%s", configs.Env.APIURL, "token-xyz")
 
 		emailNotification.
-			On("SendMagicLink", ctx, user.Email, user.Name, expectedLink).
+			On("SendMagicLink", ctx, user.Name, user.Email, expectedLink).
 			Return(nil)
 
 		err := auth.SendAuthenticationLink(ctx, user.Email)
