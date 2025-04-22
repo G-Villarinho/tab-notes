@@ -6,6 +6,7 @@ import (
 
 	"github.com/g-villarinho/tab-notes-api/configs"
 	"github.com/g-villarinho/tab-notes-api/models"
+	"github.com/g-villarinho/tab-notes-api/notifications"
 )
 
 type AuthService interface {
@@ -17,17 +18,18 @@ type AuthService interface {
 type authService struct {
 	ss SessionService
 	us UserService
-	qs QueueService
+	en notifications.EmailNotification
 }
 
 func NewAuthService(
 	sessionService SessionService,
 	userService UserService,
-	queueService QueueService) AuthService {
+	emailNotification notifications.EmailNotification,
+) AuthService {
 	return &authService{
 		ss: sessionService,
 		us: userService,
-		qs: queueService,
+		en: emailNotification,
 	}
 }
 
@@ -44,9 +46,7 @@ func (a *authService) SendAuthenticationLink(ctx context.Context, email string) 
 
 	magicLink := fmt.Sprintf("%s/magic-link/authenticate?token=%s", configs.Env.APIURL, tokenMagicLink)
 
-	body := fmt.Sprintf("Olá %s! 👋\n\nClique no link abaixo para acessar sua conta:\n\n%s\n\nEste link é válido por tempo limitado.", user.Name, magicLink)
-
-	if err := a.qs.SendEmail(ctx, email, "Acesse sua conta no Tab Notes", body); err != nil {
+	if err := a.en.SendMagicLink(ctx, user.Name, user.Email, magicLink); err != nil {
 		return fmt.Errorf("send email: %w", err)
 	}
 

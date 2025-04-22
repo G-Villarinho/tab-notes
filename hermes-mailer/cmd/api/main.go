@@ -31,7 +31,7 @@ func main() {
 	emailHandler := handlers.NewEmailHandler(emailService)
 
 	mux := http.NewServeMux()
-	mux.Handle("/send-email", middlewares.RequireAPIKey()(http.HandlerFunc(emailHandler.SendEmail)))
+	mux.Handle("/email/send", middlewares.RequireAPIKey()(http.HandlerFunc(emailHandler.SendEmail)))
 
 	port := strconv.Itoa(config.Env.API.Port)
 	log.Printf("🔥 Server is running on port %s", port)

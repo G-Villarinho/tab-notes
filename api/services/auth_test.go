@@ -18,8 +18,8 @@ func TestSendAuthenticationLink(t *testing.T) {
 	t.Run("should return error if user not found", func(t *testing.T) {
 		sessionService := new(mocks.SessionServiceMock)
 		userService := new(mocks.UserServiceMock)
-		queueService := new(mocks.QueueServiceMock)
-		auth := NewAuthService(sessionService, userService, queueService)
+		emailNotification := new(mocks.EmailNotificationMock)
+		auth := NewAuthService(sessionService, userService, emailNotification)
 
 		userService.
 			On("GetUserByEmail", ctx, "joao@example.com").
@@ -34,8 +34,8 @@ func TestSendAuthenticationLink(t *testing.T) {
 	t.Run("should return error if CreateSession fails", func(t *testing.T) {
 		sessionService := new(mocks.SessionServiceMock)
 		userService := new(mocks.UserServiceMock)
-		queueService := new(mocks.QueueServiceMock)
-		auth := NewAuthService(sessionService, userService, queueService)
+		emailNotification := new(mocks.EmailNotificationMock)
+		auth := NewAuthService(sessionService, userService, emailNotification)
 
 		user := &models.User{ID: "user-1", Name: "João", Email: "joao@example.com"}
 
@@ -57,8 +57,8 @@ func TestSendAuthenticationLink(t *testing.T) {
 	t.Run("should send email with magic link", func(t *testing.T) {
 		sessionService := new(mocks.SessionServiceMock)
 		userService := new(mocks.UserServiceMock)
-		queueService := new(mocks.QueueServiceMock)
-		auth := NewAuthService(sessionService, userService, queueService)
+		emailNotification := new(mocks.EmailNotificationMock)
+		auth := NewAuthService(sessionService, userService, emailNotification)
 
 		user := &models.User{ID: "user-1", Name: "João", Email: "joao@example.com"}
 
@@ -73,10 +73,9 @@ func TestSendAuthenticationLink(t *testing.T) {
 		configs.Env.APIURL = "http://localhost:8080"
 
 		expectedLink := fmt.Sprintf("%s/magic-link/authenticate?token=%s", configs.Env.APIURL, "token-xyz")
-		expectedBody := fmt.Sprintf("Olá %s! 👋\n\nClique no link abaixo para acessar sua conta:\n\n%s\n\nEste link é válido por tempo limitado.", user.Name, expectedLink)
 
-		queueService.
-			On("SendEmail", ctx, user.Email, "Acesse sua conta no Tab Notes", expectedBody).
+		emailNotification.
+			On("SendMagicLink", ctx, user.Email, user.Name, expectedLink).
 			Return(nil)
 
 		err := auth.SendAuthenticationLink(ctx, user.Email)
@@ -84,18 +83,17 @@ func TestSendAuthenticationLink(t *testing.T) {
 		assert.NoError(t, err)
 		userService.AssertExpectations(t)
 		sessionService.AssertExpectations(t)
-		queueService.AssertExpectations(t)
+		emailNotification.AssertExpectations(t)
 	})
 }
-
 func TestAuthenticateFromLink(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("should return error if session is invalid", func(t *testing.T) {
 		sessionService := new(mocks.SessionServiceMock)
 		userService := new(mocks.UserServiceMock)
-		queueService := new(mocks.QueueServiceMock)
-		auth := NewAuthService(sessionService, userService, queueService)
+		emailNotification := new(mocks.EmailNotificationMock)
+		auth := NewAuthService(sessionService, userService, emailNotification)
 
 		sessionService.
 			On("ValidSession", ctx, "invalid-token").
@@ -111,8 +109,8 @@ func TestAuthenticateFromLink(t *testing.T) {
 	t.Run("should return auth response if session is valid", func(t *testing.T) {
 		sessionService := new(mocks.SessionServiceMock)
 		userService := new(mocks.UserServiceMock)
-		queueService := new(mocks.QueueServiceMock)
-		auth := NewAuthService(sessionService, userService, queueService)
+		emailNotification := new(mocks.EmailNotificationMock)
+		auth := NewAuthService(sessionService, userService, emailNotification)
 
 		sessionService.
 			On("ValidSession", ctx, "valid-token").
@@ -133,8 +131,8 @@ func TestLogout(t *testing.T) {
 	t.Run("should return error if session revocation fails", func(t *testing.T) {
 		sessionService := new(mocks.SessionServiceMock)
 		userService := new(mocks.UserServiceMock)
-		queueService := new(mocks.QueueServiceMock)
-		auth := NewAuthService(sessionService, userService, queueService)
+		emailNotification := new(mocks.EmailNotificationMock)
+		auth := NewAuthService(sessionService, userService, emailNotification)
 
 		sessionService.
 			On("RevokeSession", ctx, "sess-123").
@@ -149,8 +147,8 @@ func TestLogout(t *testing.T) {
 	t.Run("should logout successfully", func(t *testing.T) {
 		sessionService := new(mocks.SessionServiceMock)
 		userService := new(mocks.UserServiceMock)
-		queueService := new(mocks.QueueServiceMock)
-		auth := NewAuthService(sessionService, userService, queueService)
+		emailNotification := new(mocks.EmailNotificationMock)
+		auth := NewAuthService(sessionService, userService, emailNotification)
 
 		sessionService.
 			On("RevokeSession", ctx, "sess-456").

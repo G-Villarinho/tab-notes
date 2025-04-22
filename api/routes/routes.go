@@ -8,12 +8,13 @@ import (
 	"github.com/g-villarinho/tab-notes-api/configs"
 	"github.com/g-villarinho/tab-notes-api/handlers"
 	"github.com/g-villarinho/tab-notes-api/middlewares"
+	"github.com/g-villarinho/tab-notes-api/notifications"
 	"github.com/g-villarinho/tab-notes-api/pkgs"
 	"github.com/g-villarinho/tab-notes-api/repositories"
 	"github.com/g-villarinho/tab-notes-api/services"
 )
 
-func SetupRoutes(db *sql.DB, queueClient clients.QueueClient) *Router {
+func SetupRoutes(db *sql.DB) *Router {
 	router := NewRouter()
 
 	if strings.ToLower(configs.Env.Env) == "development" {
@@ -23,7 +24,7 @@ func SetupRoutes(db *sql.DB, queueClient clients.QueueClient) *Router {
 	}
 
 	setupHealthRoutes(db, router)
-	setupAuthRoutes(db, router, queueClient)
+	setupAuthRoutes(db, router)
 	setupRegisterRoutes(db, router)
 	setupUserRoutes(db, router)
 	setupFollowerRoutes(db, router)
@@ -41,11 +42,13 @@ func setupHealthRoutes(db *sql.DB, router *Router) {
 	router.GET("/health", healthHandler.Check)
 }
 
-func setupAuthRoutes(db *sql.DB, router *Router, queueClient clients.QueueClient) {
+func setupAuthRoutes(db *sql.DB, router *Router) {
 	ecdsa := pkgs.NewEcdsaKeyPair()
 	requestContext := pkgs.NewRequestContext()
 
-	queueService := services.NewQueueService(queueClient)
+	emailClient := clients.NewHermesMailerClient()
+
+	emailNotifcation := notifications.NewEmailNotification(emailClient)
 
 	tokenService := services.NewTokenService(ecdsa)
 	sessionRepository := repositories.NewSessionRepository(db)
@@ -56,7 +59,7 @@ func setupAuthRoutes(db *sql.DB, router *Router, queueClient clients.QueueClient
 	userService := services.NewUserService(followerService, userRepository)
 
 	sessionService := services.NewSessionService(tokenService, sessionRepository)
-	authService := services.NewAuthService(sessionService, userService, queueService)
+	authService := services.NewAuthService(sessionService, userService, emailNotifcation)
 	authHandler := handlers.NewAuthHandler(authService, requestContext)
 
 	authMiddleware := middlewares.NewAuthMiddleware(ecdsa, requestContext, sessionService)
@@ -70,6 +73,10 @@ func setupRegisterRoutes(db *sql.DB, router *Router) {
 	ecdsa := pkgs.NewEcdsaKeyPair()
 	tokenService := services.NewTokenService(ecdsa)
 
+	emailClient := clients.NewHermesMailerClient()
+
+	emailNotification := notifications.NewEmailNotification(emailClient)
+
 	sessionRepository := repositories.NewSessionRepository(db)
 	userRepository := repositories.NewUserRepository(db)
 	followerRepository := repositories.NewFollowerRepository(db)
@@ -77,7 +84,7 @@ func setupRegisterRoutes(db *sql.DB, router *Router) {
 	userService := services.NewUserService(followerService, userRepository)
 
 	sessionService := services.NewSessionService(tokenService, sessionRepository)
-	registerService := services.NewRegisterService(userService, sessionService)
+	registerService := services.NewRegisterService(userService, sessionService, emailNotification)
 	registerHandler := handlers.NewRegisterHandler(registerService)
 
 	router.POST("/register", registerHandler.RegisterUser)

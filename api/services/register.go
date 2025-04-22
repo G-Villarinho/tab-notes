@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/g-villarinho/tab-notes-api/configs"
+	"github.com/g-villarinho/tab-notes-api/notifications"
 )
 
 type RegisterService interface {
@@ -14,14 +15,17 @@ type RegisterService interface {
 type registerService struct {
 	us UserService
 	ss SessionService
+	en notifications.EmailNotification
 }
 
 func NewRegisterService(
 	userService UserService,
-	sessionService SessionService) RegisterService {
+	sessionService SessionService,
+	emailNotification notifications.EmailNotification) RegisterService {
 	return &registerService{
 		us: userService,
 		ss: sessionService,
+		en: emailNotification,
 	}
 }
 
@@ -38,8 +42,9 @@ func (r *registerService) RegisterUser(ctx context.Context, name string, usernam
 
 	magicLink := fmt.Sprintf("%s/magic-link/authenticate?token=%s", configs.Env.APIURL, tokenMagicLink)
 
-	// TODO: Send email with magic link
-	fmt.Println("Magic link:", magicLink)
+	if err := r.en.SendWelcomeEmail(ctx, name, email, magicLink); err != nil {
+		return fmt.Errorf("send welcome email: %w", err)
+	}
 
 	return nil
 }

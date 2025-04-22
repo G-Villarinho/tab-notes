@@ -18,7 +18,9 @@ func TestRegisterUser(t *testing.T) {
 	t.Run("should return error if CreateUser fails", func(t *testing.T) {
 		userService := new(mocks.UserServiceMock)
 		sessionService := new(mocks.SessionServiceMock)
-		s := NewRegisterService(userService, sessionService)
+		emailNotification := new(mocks.EmailNotificationMock)
+
+		s := NewRegisterService(userService, sessionService, emailNotification)
 
 		userService.
 			On("CreateUser", ctx, "João", "joaozinha-30", "joao@example.com").
@@ -33,7 +35,9 @@ func TestRegisterUser(t *testing.T) {
 	t.Run("should return error if CreateSession fails", func(t *testing.T) {
 		userService := new(mocks.UserServiceMock)
 		sessionService := new(mocks.SessionServiceMock)
-		s := NewRegisterService(userService, sessionService)
+		emailNotification := new(mocks.EmailNotificationMock)
+
+		s := NewRegisterService(userService, sessionService, emailNotification)
 
 		user := &models.User{ID: "user-123", Name: "João", Email: "joao@example.com"}
 
@@ -52,10 +56,44 @@ func TestRegisterUser(t *testing.T) {
 		sessionService.AssertExpectations(t)
 	})
 
-	t.Run("should create user and session successfully", func(t *testing.T) {
+	t.Run("should return error if SendWelcomeEmail fails", func(t *testing.T) {
 		userService := new(mocks.UserServiceMock)
 		sessionService := new(mocks.SessionServiceMock)
-		s := NewRegisterService(userService, sessionService)
+		emailNotification := new(mocks.EmailNotificationMock)
+
+		s := NewRegisterService(userService, sessionService, emailNotification)
+
+		user := &models.User{ID: "user-123", Name: "João", Email: "joao@example.com"}
+
+		userService.
+			On("CreateUser", ctx, "João", "joaozinha-30", "joao@example.com").
+			Return(user, nil)
+
+		sessionService.
+			On("CreateSession", ctx, "user-123", "joao@example.com").
+			Return("token123", nil)
+
+		configs.Env.APIURL = "http://localhost:8080"
+		expectedLink := "http://localhost:8080/magic-link/authenticate?token=token123"
+
+		emailNotification.
+			On("SendWelcomeEmail", ctx, "João", "joao@example.com", expectedLink).
+			Return(errors.New("email fail"))
+
+		err := s.RegisterUser(ctx, "João", "joaozinha-30", "joao@example.com")
+
+		assert.ErrorContains(t, err, "email fail")
+		userService.AssertExpectations(t)
+		sessionService.AssertExpectations(t)
+		emailNotification.AssertExpectations(t)
+	})
+
+	t.Run("should create user, session and send welcome email successfully", func(t *testing.T) {
+		userService := new(mocks.UserServiceMock)
+		sessionService := new(mocks.SessionServiceMock)
+		emailNotification := new(mocks.EmailNotificationMock)
+
+		s := NewRegisterService(userService, sessionService, emailNotification)
 
 		user := &models.User{ID: "user-123", Name: "João", Email: "joao@example.com"}
 
@@ -68,15 +106,17 @@ func TestRegisterUser(t *testing.T) {
 			Return("mock-token-abc", nil)
 
 		configs.Env.APIURL = "http://localhost:8080"
-
 		expectedLink := fmt.Sprintf("%s/magic-link/authenticate?token=%s", configs.Env.APIURL, "mock-token-abc")
 
-		t.Log("Esperado:", expectedLink)
+		emailNotification.
+			On("SendWelcomeEmail", ctx, "João", "joao@example.com", expectedLink).
+			Return(nil)
 
 		err := s.RegisterUser(ctx, "João", "joaozinha-30", "joao@example.com")
 
 		assert.NoError(t, err)
 		userService.AssertExpectations(t)
 		sessionService.AssertExpectations(t)
+		emailNotification.AssertExpectations(t)
 	})
 }

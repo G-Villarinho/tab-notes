@@ -32,6 +32,10 @@ func LoadEnv() error {
 		AllowedOrigins: parseList(getEnv("ALLOWED_ORIGINS", "*")),
 		MaxBodySize:    parseInt64(getEnv("MAX_BODY_SIZE", "1048576")), // 1MB
 		AMQPURL:        getEnv("AMQP_URL", "amqp://guest:guest@localhost:5672/"),
+		Hermes: models.Hermes{
+			APIURL: getEnv("HERMES_API_URL", "http://localhost:8888"),
+			APIKey: getEnv("HERMES_API_KEY", ""),
+		},
 	}
 
 	privateKey, err := loadKeyFromFile(os.Getenv("KEY_ECDSA_PRIVATE"))

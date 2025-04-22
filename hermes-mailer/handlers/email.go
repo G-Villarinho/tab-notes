@@ -32,7 +32,7 @@ func (e *emailHandler) SendEmail(w http.ResponseWriter, r *http.Request) {
 	var payload models.Email
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		logger.Error("decode request body", "error", err)
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 

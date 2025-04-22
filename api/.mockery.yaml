@@ -29,3 +29,7 @@ packages:
         config:
             all: True
             recursive: True
+    github.com/g-villarinho/tab-notes-api/notifications:
+        config:
+            all: True
+            recursive: True

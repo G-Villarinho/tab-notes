@@ -10,6 +10,7 @@ type Environment struct {
 	RedirectURL    string
 	APIURL         string
 	AMQPURL        string
+	Hermes         Hermes
 }
 
 type Mysql struct {
@@ -23,4 +24,9 @@ type Mysql struct {
 type Key struct {
 	PrivateKey string
 	PublicKey  string
+}
+
+type Hermes struct {
+	APIURL string
+	APIKey string
 }
