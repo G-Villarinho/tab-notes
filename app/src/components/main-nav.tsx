@@ -18,7 +18,7 @@ const navItems = [
   {
     label: "Configurações",
     icon: Settings,
-    href: "/settings/account",
+    href: "/settings/security-and-account-acess",
   },
 ];
 

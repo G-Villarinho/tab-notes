@@ -123,16 +123,6 @@ export function SecurityAndAccountAcessPage() {
             </div>
           )}
         </div>
-
-        <div className="rounded-xl border p-4 bg-background shadow-sm">
-          <h2 className="font-medium text-base">Trocar senha</h2>
-          <p className="text-sm text-muted-foreground">
-            Recomendado se você suspeitar de atividade suspeita.
-          </p>
-          <button className="mt-2 text-sm font-medium text-primary hover:underline">
-            Alterar senha
-          </button>
-        </div>
       </div>
     </div>
   );

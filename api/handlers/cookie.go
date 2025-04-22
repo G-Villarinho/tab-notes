@@ -7,7 +7,7 @@ import (
 
 func SetTokenCookie(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
-		Name:     "tabnews_id",
+		Name:     "tabnotes_id",
 		Value:    token,
 		Path:     "/",
 		HttpOnly: true,
@@ -18,7 +18,7 @@ func SetTokenCookie(w http.ResponseWriter, token string) {
 }
 
 func GetTokenCookie(r *http.Request) (string, error) {
-	cookie, err := r.Cookie("tabnews_id")
+	cookie, err := r.Cookie("tabnotes_id")
 	if err != nil {
 		return "", err
 	}
@@ -27,7 +27,7 @@ func GetTokenCookie(r *http.Request) (string, error) {
 
 func DeleteTokenCookie(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
-		Name:     "tabnews_id",
+		Name:     "tabnotes_id",
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,

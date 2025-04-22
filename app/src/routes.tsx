@@ -51,10 +51,6 @@ export const router = createBrowserRouter([
         element: <SettingsLayout />,
         children: [
           {
-            path: "account",
-            element: <div>Account Settings</div>,
-          },
-          {
             path: "security-and-account-acess",
             element: <SecurityAndAccountAcessPage />,
           },
